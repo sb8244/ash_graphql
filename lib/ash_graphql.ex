@@ -37,7 +37,8 @@ defmodule AshGraphql do
             domain: opts[:domain],
             action_middleware: opts[:action_middleware] || [],
             define_relay_types?: Keyword.get(opts, :define_relay_types?, true),
-            relay_ids?: Keyword.get(opts, :relay_ids?, false)
+            relay_ids?: Keyword.get(opts, :relay_ids?, false),
+            included_types: opts[:included_types]
           ],
           generated: true do
       require Ash.Domain.Info
@@ -220,8 +221,14 @@ defmodule AshGraphql do
 
         if first? do
           import_types(Absinthe.Type.Custom)
-          import_types(AshGraphql.Types.JSON)
-          import_types(AshGraphql.Types.JSONString)
+
+          if included_types == nil or :json in included_types do
+            import_types(AshGraphql.Types.JSON)
+          end
+
+          if included_types == nil or :json_string in included_types do
+            import_types(AshGraphql.Types.JSONString)
+          end
         end
 
         @pipeline_modifier Module.concat(domain, AshTypes)
